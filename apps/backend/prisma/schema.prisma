@@ -1,0 +1,91 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  email        String   @unique
+  passwordHash String
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+
+  memberships Member[]
+  servers     Server[]  @relation("ServerOwner")
+  messages    Message[]
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum ChannelType {
+  TEXT
+  VOICE
+}
+
+model Server {
+  id        String   @id @default(uuid())
+  name      String
+  iconUrl   String?
+  ownerId   String
+  owner     User     @relation("ServerOwner", fields: [ownerId], references: [id])
+  createdAt DateTime @default(now())
+
+  channels Channel[]
+  members  Member[]
+  invites  InviteToken[]
+}
+
+model Member {
+  id       String   @id @default(uuid())
+  userId   String
+  serverId String
+  role     Role     @default(MEMBER)
+  joinedAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, serverId])
+}
+
+model Channel {
+  id        String      @id @default(uuid())
+  serverId  String
+  name      String
+  type      ChannelType @default(VOICE)
+  userLimit Int         @default(0)
+
+  server   Server    @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  messages Message[]
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  content   String
+  channelId String
+  userId    String
+  createdAt DateTime @default(now())
+
+  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model InviteToken {
+  id        String    @id @default(uuid())
+  code      String    @unique
+  serverId  String
+  expiresAt DateTime?
+  maxUses   Int?
+  uses      Int       @default(0)
+
+  server Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+}
