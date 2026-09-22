@@ -8,7 +8,10 @@
   "scripts": {
     "dev:backend": "npm run dev --workspace=apps/backend",
     "dev:frontend": "npm run dev --workspace=apps/frontend",
-    "build": "npm run build --workspace=apps/backend && npm run build --workspace=apps/frontend",
+    "build:backend": "npm run build --workspace=apps/backend",
+    "build:frontend": "npm run build --workspace=apps/frontend",
+    "build": "npm run build:backend",
+    "start": "npm run start --workspace=apps/backend",
     "db:push": "npm run db:push --workspace=apps/backend",
     "db:generate": "npm run db:generate --workspace=apps/backend"
   }
