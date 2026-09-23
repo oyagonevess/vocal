@@ -12,6 +12,7 @@
     "build:frontend": "npm run build --workspace=apps/frontend",
     "build": "npm run build:backend",
     "start": "npm run start --workspace=apps/backend",
+    "postinstall": "npm run db:generate",
     "db:push": "npm run db:push --workspace=apps/backend",
     "db:generate": "npm run db:generate --workspace=apps/backend"
   }
