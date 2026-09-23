@@ -8,10 +8,17 @@ export const api = axios.create({
   withCredentials: true,
 });
 
-let accessToken: string | null = null;
+let accessToken: string | null = typeof window !== 'undefined' ? localStorage.getItem('vocalis_access_token') : null;
 
 export function setAccessToken(token: string | null) {
   accessToken = token;
+  if (typeof window !== 'undefined') {
+    if (token) {
+      localStorage.setItem('vocalis_access_token', token);
+    } else {
+      localStorage.removeItem('vocalis_access_token');
+    }
+  }
 }
 
 export function getAccessToken(): string | null {
