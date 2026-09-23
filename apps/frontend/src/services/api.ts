@@ -26,8 +26,9 @@ export function getAccessToken(): string | null {
 }
 
 api.interceptors.request.use((config) => {
-  if (accessToken) {
-    config.headers.Authorization = `Bearer ${accessToken}`;
+  const token = getAccessToken() || (typeof window !== 'undefined' ? localStorage.getItem('vocalis_access_token') : null);
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
@@ -40,7 +41,8 @@ api.interceptors.response.use(
       error.response?.status === 401 &&
       !originalRequest._retry &&
       !originalRequest.url?.includes('/auth/login') &&
-      !originalRequest.url?.includes('/auth/register')
+      !originalRequest.url?.includes('/auth/register') &&
+      !originalRequest.url?.includes('/auth/refresh')
     ) {
       originalRequest._retry = true;
       try {
@@ -51,8 +53,11 @@ api.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return api(originalRequest);
       } catch (refreshErr) {
-        setAccessToken(null);
-        window.dispatchEvent(new Event('vocalis-logout'));
+        const savedToken = typeof window !== 'undefined' ? localStorage.getItem('vocalis_access_token') : null;
+        if (!savedToken) {
+          setAccessToken(null);
+          window.dispatchEvent(new Event('vocalis-logout'));
+        }
       }
     }
     return Promise.reject(error);

@@ -52,10 +52,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const initAuth = async () => {
     const savedToken = typeof window !== 'undefined' ? localStorage.getItem('vocalis_access_token') : null;
+    const savedUserStr = typeof window !== 'undefined' ? localStorage.getItem('vocalis_user') : null;
+    let savedUser = null;
+    if (savedUserStr) {
+      try {
+        savedUser = JSON.parse(savedUserStr);
+      } catch (e) {}
+    }
     
     if (savedToken) {
       setAccessToken(savedToken);
       setAccessTokenState(savedToken);
+      if (savedUser) setUser(savedUser);
+
       try {
         const meRes = await api.get('/auth/me');
         if (meRes.data?.user) {
@@ -72,7 +81,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
           }
         } catch (refreshErr) {
-          clearAuthSession();
+          if (!savedUser) {
+            clearAuthSession();
+          }
         }
       } finally {
         setLoading(false);
