@@ -41,7 +41,7 @@ app.get('/health', (req, res) => {
 // Initialize SFU Signaling Server
 sfuServer.init(server);
 
-// Start Server & Connect Database
+// Start Server & Connect Database (Only in non-serverless standalone mode)
 async function bootstrap() {
   try {
     await prisma.$connect();
@@ -57,4 +57,8 @@ async function bootstrap() {
   }
 }
 
-bootstrap();
+if (!process.env.VERCEL) {
+  bootstrap();
+}
+
+export default app;
