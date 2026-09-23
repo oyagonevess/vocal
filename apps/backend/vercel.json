@@ -1,18 +1,13 @@
 {
   "version": 2,
-  "buildCommand": "prisma generate && tsc",
-  "builds": [
-    {
-      "src": "api/index.ts",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": [
-          "node_modules/.prisma/client/**",
-          "prisma/schema.prisma"
-        ]
-      }
+  "functions": {
+    "api/index.ts": {
+      "includeFiles": [
+        "node_modules/.prisma/client/**",
+        "prisma/schema.prisma"
+      ]
     }
-  ],
+  },
   "routes": [
     {
       "src": "/(.*)",
