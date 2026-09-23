@@ -33,10 +33,22 @@ app.use('/api', messageRoutes);
 app.use('/api/rtc/turn', turnRoutes);
 app.use('/api', agoraRoutes);
 
-// Health Check
+// Root & Health Check Routes
+app.get('/', (req, res) => {
+  res.json({
+    status: 'ok',
+    service: 'Vocalis Backend API (Agora.io Powered)',
+    message: 'Backend a funcionar!',
+    timestamp: new Date(),
+  });
+});
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'Vocalis RTC Engine (Agora.io Powered)', timestamp: new Date() });
 });
+
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+app.get('/favicon.png', (req, res) => res.status(204).end());
 
 // Initialize SFU Signaling Server
 sfuServer.init(server);
