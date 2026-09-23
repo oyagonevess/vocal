@@ -83,6 +83,7 @@ export async function register(req: Request, res: Response) {
       },
     });
   } catch (err) {
+    console.error('[ERRO REGISTO]:', err);
     return res.status(500).json({ error: 'Erro ao registrar usuário.' });
   }
 }
@@ -135,6 +136,7 @@ export async function login(req: Request, res: Response) {
       },
     });
   } catch (err) {
+    console.error('[ERRO LOGIN]:', err);
     return res.status(500).json({ error: 'Erro ao efetuar login.' });
   }
 }
