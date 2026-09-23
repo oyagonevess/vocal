@@ -4,12 +4,12 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "postinstall": "npx prisma generate --schema=prisma/schema.prisma",
-    "build": "npx prisma generate --schema=prisma/schema.prisma && tsc",
-    "vercel-build": "npx prisma generate --schema=prisma/schema.prisma && tsc",
+    "postinstall": "npx prisma@5.22.0 generate --schema=prisma/schema.prisma",
+    "build": "npx prisma@5.22.0 generate --schema=prisma/schema.prisma && tsc",
+    "vercel-build": "npx prisma@5.22.0 generate --schema=prisma/schema.prisma && tsc",
     "start": "node dist/index.js",
-    "db:push": "npx prisma db push --schema=prisma/schema.prisma",
-    "db:generate": "npx prisma generate --schema=prisma/schema.prisma"
+    "db:push": "npx prisma@5.22.0 db push --schema=prisma/schema.prisma",
+    "db:generate": "npx prisma@5.22.0 generate --schema=prisma/schema.prisma"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
