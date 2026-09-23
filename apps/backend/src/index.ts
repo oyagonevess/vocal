@@ -14,6 +14,7 @@ import { sfuServer } from './rtc/sfuServer.js';
 import { prisma } from './services/db.js';
 
 const app = express();
+app.set('trust proxy', 1);
 const server = http.createServer(app);
 
 // Security & Parsing Middlewares
