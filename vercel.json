@@ -1,9 +1,16 @@
 {
   "version": 2,
+  "buildCommand": "npm run db:generate && npm run build",
   "builds": [
     {
       "src": "api/index.ts",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": [
+          "node_modules/.prisma/client/**",
+          "apps/backend/prisma/schema.prisma"
+        ]
+      }
     },
     {
       "src": "apps/frontend/package.json",
@@ -26,4 +33,3 @@
     }
   ]
 }
-
