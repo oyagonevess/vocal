@@ -233,45 +233,104 @@ export const RTCProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         });
       });
 
+      // Handle Remote Users Joining Channel
+      agoraClient.on('user-joined', (remoteUser) => {
+        console.log('👤 [Agora RTC] Remote user-joined event:', remoteUser.uid);
+        setPeers((prev) => {
+          const uidStr = String(remoteUser.uid);
+          const exists = prev.some((p) => p.userId === uidStr || p.socketId === uidStr);
+          if (!exists) {
+            const newPeer: RoomPeer = {
+              socketId: uidStr,
+              userId: uidStr,
+              username: `Usuário ${uidStr.substring(0, 6)}`,
+              avatarUrl: `https://api.dicebear.com/7.x/bottts/svg?seed=${uidStr}`,
+              muted: false,
+              deafened: false,
+              cameraOn: false,
+              screenSharing: false,
+              isSpeaking: false,
+            };
+            return [...prev, newPeer];
+          }
+          return prev;
+        });
+      });
+
+      // Handle Remote Users Leaving Channel
+      agoraClient.on('user-left', (remoteUser) => {
+        console.log('🚪 [Agora RTC] Remote user-left event:', remoteUser.uid);
+        const uidStr = String(remoteUser.uid);
+        setPeers((prev) => prev.filter((p) => p.userId !== uidStr && p.socketId !== uidStr));
+      });
+
       // Handle Remote Users Publishing Tracks (Audio / Video / Screen)
       agoraClient.on('user-published', async (remoteUser, mediaType) => {
+        console.log('📡 [Agora RTC] Remote user-published event:', remoteUser.uid, mediaType);
         await agoraClient.subscribe(remoteUser, mediaType);
+
+        const uidStr = String(remoteUser.uid);
 
         if (mediaType === 'audio') {
           const remoteAudioTrack = remoteUser.audioTrack as IRemoteAudioTrack;
           remoteAudioTrack?.play();
         }
 
-        if (mediaType === 'video') {
-          const remoteVideoTrack = remoteUser.videoTrack as IRemoteVideoTrack;
-          if (remoteVideoTrack) {
-            const mediaStream = new MediaStream([remoteVideoTrack.getMediaStreamTrack()]);
+        let mediaStream: MediaStream | undefined;
+        let remoteVideoTrack: IRemoteVideoTrack | undefined;
 
-            setPeers((prev) =>
-              prev.map((p) => {
-                if (p.userId === String(remoteUser.uid)) {
-                  return {
-                    ...p,
-                    stream: mediaStream,
-                    screenStream: mediaStream,
-                    videoTrack: remoteVideoTrack,
-                    screenTrack: remoteVideoTrack,
-                    cameraOn: true,
-                    screenSharing: true,
-                  };
-                }
-                return p;
-              })
-            );
+        if (mediaType === 'video') {
+          remoteVideoTrack = remoteUser.videoTrack as IRemoteVideoTrack;
+          if (remoteVideoTrack) {
+            mediaStream = new MediaStream([remoteVideoTrack.getMediaStreamTrack()]);
           }
         }
+
+        setPeers((prev) => {
+          const exists = prev.some((p) => p.userId === uidStr || p.socketId === uidStr);
+          if (!exists) {
+            const newPeer: RoomPeer = {
+              socketId: uidStr,
+              userId: uidStr,
+              username: `Usuário ${uidStr.substring(0, 6)}`,
+              avatarUrl: `https://api.dicebear.com/7.x/bottts/svg?seed=${uidStr}`,
+              muted: false,
+              deafened: false,
+              cameraOn: mediaType === 'video',
+              screenSharing: false,
+              isSpeaking: false,
+              ...(mediaStream && { stream: mediaStream, screenStream: mediaStream }),
+              ...(remoteVideoTrack && { videoTrack: remoteVideoTrack, screenTrack: remoteVideoTrack }),
+            };
+            return [...prev, newPeer];
+          }
+
+          return prev.map((p) => {
+            if (p.userId === uidStr || p.socketId === uidStr) {
+              return {
+                ...p,
+                ...(mediaType === 'video' && mediaStream && {
+                  stream: mediaStream,
+                  screenStream: mediaStream,
+                  videoTrack: remoteVideoTrack,
+                  screenTrack: remoteVideoTrack,
+                  cameraOn: true,
+                  screenSharing: true,
+                }),
+              };
+            }
+            return p;
+          });
+        });
       });
 
       agoraClient.on('user-unpublished', (remoteUser, mediaType) => {
+        console.log('🔇 [Agora RTC] Remote user-unpublished event:', remoteUser.uid, mediaType);
         if (mediaType === 'video') {
+          const uidStr = String(remoteUser.uid);
           setPeers((prev) =>
             prev.map((p) => {
-              if (p.userId === String(remoteUser.uid)) {
+              if (p.userId === uidStr || p.socketId === uidStr) {
                 return {
                   ...p,
                   stream: undefined,
