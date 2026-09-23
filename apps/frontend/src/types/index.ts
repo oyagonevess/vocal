@@ -62,6 +62,4 @@ export interface RoomPeer {
   isSpeaking: boolean;
   stream?: MediaStream;
   screenStream?: MediaStream;
-  videoTrack?: any;
-  screenTrack?: any;
 }

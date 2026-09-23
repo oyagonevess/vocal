@@ -1,7 +1,7 @@
 import React from 'react';
-import { RoomPeer } from '../../types/index.js';
+import { RoomPeer } from '../../types/index';
 import { MicOff, Monitor, Video } from 'lucide-react';
-import { StreamPlayer } from './StreamPlayer.js';
+import { StreamPlayer } from './StreamPlayer';
 
 interface ParticipantCardProps {
   peer: RoomPeer;
@@ -10,8 +10,7 @@ interface ParticipantCardProps {
 
 export const ParticipantCard: React.FC<ParticipantCardProps> = ({ peer, isSelf = false }) => {
   const activeStream = (peer.screenSharing ? peer.screenStream : null) || peer.stream;
-  const activeTrack = (peer.screenSharing ? peer.screenTrack : null) || peer.videoTrack;
-  const hasActiveMedia = (peer.cameraOn || peer.screenSharing) && (!!activeTrack || !!activeStream);
+  const hasActiveMedia = (peer.cameraOn || peer.screenSharing) && !!activeStream;
 
   return (
     <div
@@ -26,7 +25,6 @@ export const ParticipantCard: React.FC<ParticipantCardProps> = ({ peer, isSelf =
       {/* Active Video/Screen Track */}
       {hasActiveMedia ? (
         <StreamPlayer
-          track={activeTrack}
           stream={activeStream}
           isSelf={isSelf}
           objectFit="cover"

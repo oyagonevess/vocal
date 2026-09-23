@@ -7,12 +7,12 @@ import AgoraRTC, {
   IRemoteVideoTrack,
 } from 'agora-rtc-sdk-ng';
 import { Socket } from 'socket.io-client';
-import { RoomPeer, Channel } from '../types/index.js';
-import { useAuth } from './AuthContext.js';
-import { getSocket, disconnectSocket } from '../services/socket.js';
-import { useMediaDevices } from '../hooks/useMediaDevices.js';
-import { api } from '../services/api.js';
-import { soundManager } from '../utils/soundEffects.js';
+import { RoomPeer, Channel } from '../types/index';
+import { useAuth } from './AuthContext';
+import { getSocket, disconnectSocket } from '../services/socket';
+import { useMediaDevices } from '../hooks/useMediaDevices';
+import { api } from '../services/api';
+import { soundManager } from '../utils/soundEffects';
 
 interface RTCContextType {
   activeChannel: Channel | null;
@@ -23,8 +23,6 @@ interface RTCContextType {
   leaveChannel: () => void;
   mediaDevices: ReturnType<typeof useMediaDevices>;
   channelPresence: Map<string, RoomPeer[]>;
-  localVideoTrack?: any;
-  localScreenTrack?: any;
 }
 
 const RTCContext = createContext<RTCContextType>({} as RTCContextType);
@@ -277,10 +275,9 @@ export const RTCProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
 
         let mediaStream: MediaStream | undefined;
-        let remoteVideoTrack: IRemoteVideoTrack | undefined;
 
         if (mediaType === 'video') {
-          remoteVideoTrack = remoteUser.videoTrack as IRemoteVideoTrack;
+          const remoteVideoTrack = remoteUser.videoTrack as IRemoteVideoTrack;
           if (remoteVideoTrack) {
             mediaStream = new MediaStream([remoteVideoTrack.getMediaStreamTrack()]);
           }
@@ -300,7 +297,6 @@ export const RTCProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               screenSharing: false,
               isSpeaking: false,
               ...(mediaStream && { stream: mediaStream, screenStream: mediaStream }),
-              ...(remoteVideoTrack && { videoTrack: remoteVideoTrack, screenTrack: remoteVideoTrack }),
             };
             return [...prev, newPeer];
           }
@@ -312,8 +308,6 @@ export const RTCProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 ...(mediaType === 'video' && mediaStream && {
                   stream: mediaStream,
                   screenStream: mediaStream,
-                  videoTrack: remoteVideoTrack,
-                  screenTrack: remoteVideoTrack,
                   cameraOn: true,
                   screenSharing: true,
                 }),
@@ -335,8 +329,6 @@ export const RTCProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                   ...p,
                   stream: undefined,
                   screenStream: undefined,
-                  videoTrack: undefined,
-                  screenTrack: undefined,
                   cameraOn: false,
                   screenSharing: false,
                 };
@@ -417,8 +409,6 @@ export const RTCProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         leaveChannel,
         mediaDevices,
         channelPresence,
-        localVideoTrack: localVideoTrackRef.current,
-        localScreenTrack: localScreenTrackRef.current,
       }}
     >
       {children}

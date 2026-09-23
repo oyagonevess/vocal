@@ -1,18 +1,18 @@
 import React from 'react';
 import { Volume2, Hash, Search, Bell, Settings, ShieldCheck, Radio, Monitor } from 'lucide-react';
-import { useRTC } from '../../context/RTCContext.js';
-import { useAuth } from '../../context/AuthContext.js';
-import { ParticipantCard } from './ParticipantCard.js';
-import { StreamPlayer } from './StreamPlayer.js';
-import { TextChatView } from '../chat/TextChatView.js';
-import { RoomPeer, Channel } from '../../types/index.js';
+import { useRTC } from '../../context/RTCContext';
+import { useAuth } from '../../context/AuthContext';
+import { ParticipantCard } from './ParticipantCard';
+import { StreamPlayer } from './StreamPlayer';
+import { TextChatView } from '../chat/TextChatView';
+import { RoomPeer, Channel } from '../../types/index';
 
 interface MediaStageProps {
   selectedChannel: Channel | null;
 }
 
 export const MediaStage: React.FC<MediaStageProps> = ({ selectedChannel }) => {
-  const { activeChannel, peers, mediaDevices, localVideoTrack, localScreenTrack } = useRTC();
+  const { activeChannel, peers, mediaDevices } = useRTC();
   const { user } = useAuth();
 
   const selfPeer: RoomPeer | null = user
@@ -28,8 +28,6 @@ export const MediaStage: React.FC<MediaStageProps> = ({ selectedChannel }) => {
         isSpeaking: false,
         stream: mediaDevices.localVideoStream || undefined,
         screenStream: mediaDevices.localScreenStream || undefined,
-        videoTrack: localVideoTrack || undefined,
-        screenTrack: localScreenTrack || undefined,
       }
     : null;
 
@@ -37,7 +35,6 @@ export const MediaStage: React.FC<MediaStageProps> = ({ selectedChannel }) => {
 
   // Find if any peer (or self) is sharing screen
   const screenSharingPeer = allParticipants.find((p) => p.screenSharing);
-  const activeSpotlightTrack = screenSharingPeer ? (screenSharingPeer.screenTrack || screenSharingPeer.videoTrack) : null;
   const activeSpotlightStream = screenSharingPeer ? (screenSharingPeer.screenStream || screenSharingPeer.stream) : null;
 
   const isTextChannel = selectedChannel?.type === 'TEXT';
@@ -118,7 +115,6 @@ export const MediaStage: React.FC<MediaStageProps> = ({ selectedChannel }) => {
             {/* Big Featured Screen Share Stream */}
             <div className="relative flex-1 bg-black rounded-3xl overflow-hidden border border-vocalis-accent/40 shadow-2xl flex items-center justify-center">
               <StreamPlayer
-                track={activeSpotlightTrack}
                 stream={activeSpotlightStream}
                 isSelf={screenSharingPeer?.socketId === 'self'}
                 objectFit="contain"
