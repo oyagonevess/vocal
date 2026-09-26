@@ -119,7 +119,8 @@ const StreamPlayerComponent: React.FC<StreamPlayerProps> = ({
               });
             }
           }}
-          className={`w-full h-full ${objectFit === 'cover' ? 'object-cover' : 'object-contain'}`}
+          style={{ width: '100%', height: '100%', objectFit: objectFit || 'contain' }}
+          className="w-full h-full"
         />
       )}
 

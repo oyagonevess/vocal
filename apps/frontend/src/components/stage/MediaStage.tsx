@@ -125,7 +125,7 @@ export const MediaStage: React.FC<MediaStageProps> = ({
         </header>
 
         {/* Main Viewport Grid / Stage or Text Chat */}
-        <div className="flex-1 overflow-hidden flex flex-col">
+        <div className="flex-1 overflow-hidden flex flex-col h-full">
           {!selectedChannel ? (
             /* Empty State Dashboard */
             <div className="flex flex-col items-center justify-center text-center space-y-4 max-w-md mx-auto my-auto p-6">
@@ -163,9 +163,9 @@ export const MediaStage: React.FC<MediaStageProps> = ({
             </div>
           ) : screenSharingPeer ? (
             /* 🎥 SPOTLIGHT MODE: Big Screen Transmission + Small Bottom Participant Strip (Discord Style) */
-            <div className="flex-1 p-3 md:p-4 flex flex-col space-y-3 overflow-hidden pb-20 md:pb-4">
+            <div className="flex-1 flex flex-col h-full overflow-hidden p-3 md:p-4 space-y-3 pb-20 md:pb-4">
               {/* Big Featured Screen Share Stream */}
-              <div className="relative flex-1 bg-black rounded-3xl overflow-hidden border border-vocalis-accent/40 shadow-2xl flex items-center justify-center">
+              <div className="flex-1 w-full min-h-0 flex items-center justify-center bg-black rounded-xl relative overflow-hidden border border-vocalis-accent/40 shadow-2xl">
                 <StreamPlayer
                   stream={activeSpotlightStream}
                   isSelf={screenSharingPeer?.socketId === 'self'}
