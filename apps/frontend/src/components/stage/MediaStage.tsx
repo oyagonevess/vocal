@@ -163,7 +163,7 @@ export const MediaStage: React.FC<MediaStageProps> = ({
             </div>
           ) : screenSharingPeer ? (
             /* 🎥 SPOTLIGHT MODE: Big Screen Transmission + Small Bottom Participant Strip (Discord Style) */
-            <div className="flex-1 p-4 flex flex-col space-y-3 overflow-hidden">
+            <div className="flex-1 p-3 md:p-4 flex flex-col space-y-3 overflow-hidden pb-20 md:pb-4">
               {/* Big Featured Screen Share Stream */}
               <div className="relative flex-1 bg-black rounded-3xl overflow-hidden border border-vocalis-accent/40 shadow-2xl flex items-center justify-center">
                 <StreamPlayer
@@ -180,11 +180,11 @@ export const MediaStage: React.FC<MediaStageProps> = ({
               </div>
 
               {/* Bottom Compact Horizontal Participant Strip */}
-              <div className="h-24 px-2 flex items-center justify-center space-x-3 overflow-x-auto scrollbar-thin shrink-0">
+              <div className="h-20 px-2 flex items-center justify-center space-x-3 overflow-x-auto scrollbar-thin shrink-0">
                 {allParticipants.map((peer) => (
                   <div
                     key={peer.socketId}
-                    className={`relative w-36 h-20 bg-vocalis-card rounded-2xl overflow-hidden flex flex-col items-center justify-center border transition-all duration-200 shrink-0 shadow-md ${
+                    className={`relative w-32 h-18 md:w-36 md:h-20 bg-vocalis-card rounded-2xl overflow-hidden flex flex-col items-center justify-center border transition-all duration-200 shrink-0 shadow-md ${
                       peer.isSpeaking
                         ? 'border-vocalis-neon shadow-speaker'
                         : peer.screenSharing
@@ -197,14 +197,14 @@ export const MediaStage: React.FC<MediaStageProps> = ({
                       <img
                         src={peer.avatarUrl}
                         alt={peer.username}
-                        className={`w-9 h-9 rounded-full bg-gray-700 object-cover border ${
+                        className={`w-8 h-8 md:w-9 md:h-9 rounded-full bg-gray-700 object-cover border ${
                           peer.isSpeaking ? 'border-vocalis-neon' : 'border-gray-600'
                         }`}
                       />
-                      <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border border-vocalis-card" />
+                      <span className="absolute bottom-0 right-0 w-2 h-2 md:w-2.5 md:h-2.5 bg-emerald-500 rounded-full border border-vocalis-card" />
                     </div>
 
-                    <span className="text-[11px] font-bold text-gray-200 mt-1 truncate max-w-[120px]">
+                    <span className="text-[10px] md:text-[11px] font-bold text-gray-200 mt-1 truncate max-w-[100px] md:max-w-[120px]">
                       {peer.socketId === 'self' ? `${peer.username} (Você)` : peer.username}
                     </span>
                   </div>
@@ -213,7 +213,7 @@ export const MediaStage: React.FC<MediaStageProps> = ({
             </div>
           ) : (
             /* Standard Voice Grid Mode (When No Screen Share is Active) */
-            <div className="flex-1 p-3 sm:p-4 md:p-8 overflow-y-auto scrollbar-thin flex items-center justify-center">
+            <div className="flex-1 p-3 sm:p-4 md:p-8 overflow-y-auto scrollbar-thin flex items-center justify-center pb-24 md:pb-8">
               <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 max-w-5xl mx-auto w-full">
                 {allParticipants.map((peer) => (
                   <ParticipantCard

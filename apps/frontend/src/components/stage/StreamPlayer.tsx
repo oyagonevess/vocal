@@ -35,9 +35,23 @@ const StreamPlayerComponent: React.FC<StreamPlayerProps> = ({
     videoEl.muted = isMuted;
     videoEl.volume = volume;
 
-    videoEl.play().catch((err) => {
-      console.warn('Autoplay com áudio prevenido pelo navegador:', err);
-    });
+    const playVideo = async () => {
+      try {
+        await videoEl.play();
+      } catch (err) {
+        console.warn('Autoplay bloqueado pelo navegador mobile, tentando em mute:', err);
+        if (videoEl) {
+          videoEl.muted = true;
+          try {
+            await videoEl.play();
+          } catch (e2) {
+            console.error('Erro ao reproduzir stream de vídeo:', e2);
+          }
+        }
+      }
+    };
+
+    playVideo();
 
     return () => {
       if (videoEl) {
@@ -95,7 +109,17 @@ const StreamPlayerComponent: React.FC<StreamPlayerProps> = ({
           autoPlay
           playsInline
           muted={isMuted}
-          className={`w-full h-full object-${objectFit}`}
+          onLoadedMetadata={() => {
+            if (videoRef.current) {
+              videoRef.current.play().catch(() => {
+                if (videoRef.current) {
+                  videoRef.current.muted = true;
+                  videoRef.current.play().catch(() => {});
+                }
+              });
+            }
+          }}
+          className={`w-full h-full ${objectFit === 'cover' ? 'object-cover' : 'object-contain'}`}
         />
       )}
 
