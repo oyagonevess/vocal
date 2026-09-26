@@ -14,7 +14,7 @@ export const ParticipantCard: React.FC<ParticipantCardProps> = ({ peer, isSelf =
 
   return (
     <div
-      className={`relative w-full h-full min-h-[240px] bg-vocalis-card rounded-2xl overflow-hidden flex flex-col items-center justify-center border transition-all duration-200 shadow-xl ${
+      className={`relative w-full h-40 md:h-48 bg-vocalis-card rounded-2xl overflow-hidden flex flex-col items-center justify-center border transition-all duration-200 shadow-lg ${
         peer.isSpeaking
           ? 'border-vocalis-neon shadow-speaker'
           : peer.screenSharing
@@ -31,17 +31,27 @@ export const ParticipantCard: React.FC<ParticipantCardProps> = ({ peer, isSelf =
         />
       ) : (
         /* Avatar Placeholder when Camera and Screen Share are Off */
-        <div className="flex flex-col items-center space-y-3">
+        <div className="flex flex-col items-center space-y-2">
           <div className="relative">
-            <img
-              src={peer.avatarUrl}
-              alt={peer.username}
-              className={`w-24 h-24 rounded-full bg-gray-800 object-cover border-2 transition-all ${
-                peer.isSpeaking ? 'border-vocalis-neon scale-105 shadow-speaker' : 'border-gray-700'
-              }`}
-            />
+            {peer.avatarUrl ? (
+              <img
+                src={peer.avatarUrl}
+                alt={peer.username}
+                className={`w-16 h-16 md:w-20 md:h-20 rounded-full bg-gray-800 object-cover border-2 transition-all ${
+                  peer.isSpeaking ? 'border-vocalis-neon scale-105 shadow-speaker' : 'border-gray-700'
+                }`}
+              />
+            ) : (
+              <div
+                className={`w-16 h-16 md:w-20 md:h-20 rounded-full bg-gray-800 border-2 flex items-center justify-center text-xl font-bold text-gray-200 transition-all ${
+                  peer.isSpeaking ? 'border-vocalis-neon scale-105 shadow-speaker' : 'border-gray-700'
+                }`}
+              >
+                {peer.username.substring(0, 2).toUpperCase()}
+              </div>
+            )}
             {peer.isSpeaking && (
-              <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-vocalis-neon text-[10px] font-bold text-white rounded-full uppercase tracking-wider animate-pulse">
+              <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-vocalis-neon text-[9px] font-bold text-white rounded-full uppercase tracking-wider animate-pulse">
                 Falando
               </span>
             )}

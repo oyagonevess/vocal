@@ -7,10 +7,10 @@ import { config } from '../config/index.js';
 import { AuthenticatedRequest } from '../middleware/auth.js';
 
 const registerSchema = z.object({
-  username: z.string().min(3).max(30).regex(/^[a-zA-Z0-9_]+$/),
+  username: z.string().min(3).max(30),
   email: z.string().email(),
   password: z.string().min(6),
-  avatarUrl: z.string().url().optional(),
+  avatarUrl: z.string().optional().nullable(),
 });
 
 const loginSchema = z.object({
@@ -19,8 +19,8 @@ const loginSchema = z.object({
 });
 
 const updateProfileSchema = z.object({
-  username: z.string().min(3).max(30).regex(/^[a-zA-Z0-9_]+$/).optional(),
-  avatarUrl: z.string().url().optional(),
+  username: z.string().min(3).max(30).optional(),
+  avatarUrl: z.string().optional().nullable(),
 });
 
 export async function register(req: Request, res: Response) {

@@ -170,9 +170,9 @@ export const MediaStage: React.FC<MediaStageProps> = ({ selectedChannel, onToggl
             </div>
           </div>
         ) : (
-          /* Standard 2x2 Voice Grid Mode (When No Screen Share is Active) */
-          <div className="flex-1 p-6 overflow-y-auto scrollbar-thin flex flex-col justify-center">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 max-w-6xl mx-auto w-full h-full max-h-[75vh]">
+          /* Standard Voice Grid Mode (When No Screen Share is Active) */
+          <div className="flex-1 p-4 md:p-8 overflow-y-auto scrollbar-thin flex items-center justify-center">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-5xl mx-auto w-full">
               {allParticipants.map((peer) => (
                 <ParticipantCard
                   key={peer.socketId}

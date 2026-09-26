@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Server, Channel, Member } from '../../types/index.js';
 import { api } from '../../services/api.js';
-import { X, Shield, Trash2, UserX, Hash, Volume2, Settings, Users, Server as ServerIcon } from 'lucide-react';
+import { X, Shield, Trash2, UserX, Hash, Volume2, Settings, Users, Server as ServerIcon, Upload, Camera, Check, ShieldCheck } from 'lucide-react';
 
 interface ServerSettingsModalProps {
   server: Server;
@@ -20,7 +20,7 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
   onServerDeleted,
   onChannelDeleted,
 }) => {
-  const [activeTab, setActiveTab] = useState<'geral' | 'canais' | 'membros'>('geral');
+  const [activeTab, setActiveTab] = useState<'geral' | 'cargos' | 'canais' | 'membros'>('geral');
   const [name, setName] = useState(server.name);
   const [iconUrl, setIconUrl] = useState(server.iconUrl || '');
   const [members, setMembers] = useState<Member[]>(server.members);
@@ -30,9 +30,26 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
   const currentUserMember = server.members.find((m) => m.userId === currentUserId);
   const isOwner = currentUserMember?.role === 'OWNER';
   const isAdmin = currentUserMember?.role === 'ADMIN' || isOwner;
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setError('A imagem deve ter no máximo 5MB.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setIconUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleUpdateServer = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,17 +94,19 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
     try {
       const res = await api.put(`/servers/${server.id}/members/${targetUserId}/role`, { role: newRole });
       setMembers((prev) => prev.map((m) => (m.userId === targetUserId ? { ...m, role: newRole } : m)));
+      setSuccess('Cargo do membro atualizado com sucesso!');
     } catch (err: any) {
       setError(err.response?.data?.error || 'Erro ao alterar cargo do membro.');
     }
   };
 
   const handleKickMember = async (targetUserId: string) => {
-    if (!window.confirm('Deseja realmente expulsar este membro do servidor?')) return;
+    if (!window.confirm('Deseja realmente expulsar/banir este membro do servidor?')) return;
 
     try {
       await api.delete(`/servers/${server.id}/members/${targetUserId}`);
       setMembers((prev) => prev.filter((m) => m.userId !== targetUserId));
+      setSuccess('Membro removido do servidor com sucesso!');
     } catch (err: any) {
       setError(err.response?.data?.error || 'Erro ao expulsar membro.');
     }
@@ -122,6 +141,16 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
             </button>
 
             <button
+              onClick={() => setActiveTab('cargos')}
+              className={`w-full flex items-center space-x-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                activeTab === 'cargos' ? 'bg-vocalis-accent text-white shadow-md' : 'text-gray-400 hover:bg-vocalis-hover hover:text-white'
+              }`}
+            >
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <span>Cargos e Permissões</span>
+            </button>
+
+            <button
               onClick={() => setActiveTab('canais')}
               className={`w-full flex items-center space-x-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === 'canais' ? 'bg-vocalis-accent text-white shadow-md' : 'text-gray-400 hover:bg-vocalis-hover hover:text-white'
@@ -150,6 +179,48 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
             {/* TAB 1: GERAL */}
             {activeTab === 'geral' && (
               <form onSubmit={handleUpdateServer} className="space-y-4">
+                {/* Server Icon File Upload Preview */}
+                <div className="flex flex-col items-center space-y-3 py-1">
+                  <div className="relative group cursor-pointer" onClick={() => isAdmin && fileInputRef.current?.click()}>
+                    {iconUrl ? (
+                      <img
+                        src={iconUrl}
+                        alt="Ícone"
+                        className="w-20 h-20 rounded-2xl bg-gray-800 border-2 border-vocalis-accent object-cover shadow-lg"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 rounded-2xl bg-gray-800 border-2 border-dashed border-gray-600 flex items-center justify-center text-gray-400">
+                        <ServerIcon className="w-8 h-8" />
+                      </div>
+                    )}
+                    {isAdmin && (
+                      <div className="absolute inset-0 rounded-2xl bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity">
+                        <Camera className="w-5 h-5" />
+                      </div>
+                    )}
+                  </div>
+
+                  {isAdmin && (
+                    <>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleFileUpload}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-3.5 py-1.5 bg-gray-800 hover:bg-vocalis-hover text-gray-200 border border-gray-700 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-colors"
+                      >
+                        <Upload className="w-3.5 h-3.5 text-vocalis-accent" />
+                        <span>Carregar Foto do Servidor</span>
+                      </button>
+                    </>
+                  )}
+                </div>
+
                 <div>
                   <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1.5">
                     Nome do Servidor
@@ -166,10 +237,10 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
 
                 <div>
                   <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1.5">
-                    URL do Ícone do Servidor
+                    URL da Foto do Servidor (Opcional)
                   </label>
                   <input
-                    type="url"
+                    type="text"
                     value={iconUrl}
                     disabled={!isAdmin}
                     onChange={(e) => setIconUrl(e.target.value)}
@@ -203,6 +274,62 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({
                   </div>
                 )}
               </form>
+            )}
+
+            {/* TAB: CARGOS E PERMISSÕES */}
+            {activeTab === 'cargos' && (
+              <div className="space-y-4">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Cargos e Permissões do Servidor</h4>
+                <p className="text-xs text-gray-400 mb-4">Veja as permissões atribuídas a cada cargo dentro deste servidor:</p>
+
+                {/* Role 1: OWNER */}
+                <div className="p-4 bg-vocalis-bg border border-amber-500/30 rounded-2xl space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-sm text-amber-400 flex items-center space-x-1.5">
+                      <ShieldCheck className="w-4 h-4" />
+                      <span>OWNER (Dono do Servidor)</span>
+                    </span>
+                    <span className="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full font-bold">TOTAL</span>
+                  </div>
+                  <ul className="text-xs text-gray-300 space-y-1 pl-1">
+                    <li className="flex items-center space-x-1.5"><Check className="w-3.5 h-3.5 text-emerald-400" /> <span>Renomear Servidor & Mudar Foto do DC</span></li>
+                    <li className="flex items-center space-x-1.5"><Check className="w-3.5 h-3.5 text-emerald-400" /> <span>Criar & Deletar Salas de Texto e Voz</span></li>
+                    <li className="flex items-center space-x-1.5"><Check className="w-3.5 h-3.5 text-emerald-400" /> <span>Expulsar & Banir Membros</span></li>
+                    <li className="flex items-center space-x-1.5"><Check className="w-3.5 h-3.5 text-emerald-400" /> <span>Atribuir Cargo ADMIN ou MEMBER</span></li>
+                  </ul>
+                </div>
+
+                {/* Role 2: ADMIN */}
+                <div className="p-4 bg-vocalis-bg border border-vocalis-accent/30 rounded-2xl space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-sm text-vocalis-accent flex items-center space-x-1.5">
+                      <Shield className="w-4 h-4" />
+                      <span>ADMIN (Administrador)</span>
+                    </span>
+                    <span className="text-[10px] bg-vocalis-accent/20 text-indigo-300 px-2 py-0.5 rounded-full font-bold">ELEVADO</span>
+                  </div>
+                  <ul className="text-xs text-gray-300 space-y-1 pl-1">
+                    <li className="flex items-center space-x-1.5"><Check className="w-3.5 h-3.5 text-emerald-400" /> <span>Renomear Servidor & Mudar Foto do DC</span></li>
+                    <li className="flex items-center space-x-1.5"><Check className="w-3.5 h-3.5 text-emerald-400" /> <span>Criar & Deletar Salas de Texto e Voz</span></li>
+                    <li className="flex items-center space-x-1.5"><Check className="w-3.5 h-3.5 text-emerald-400" /> <span>Expulsar Membros</span></li>
+                  </ul>
+                </div>
+
+                {/* Role 3: MEMBER */}
+                <div className="p-4 bg-vocalis-bg border border-gray-800 rounded-2xl space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-sm text-gray-300 flex items-center space-x-1.5">
+                      <Users className="w-4 h-4" />
+                      <span>MEMBER (Membro Padrão)</span>
+                    </span>
+                    <span className="text-[10px] bg-gray-800 text-gray-400 px-2 py-0.5 rounded-full font-bold">PADRÃO</span>
+                  </div>
+                  <ul className="text-xs text-gray-300 space-y-1 pl-1">
+                    <li className="flex items-center space-x-1.5"><Check className="w-3.5 h-3.5 text-emerald-400" /> <span>Entrar em Salas de Voz e Transmitir</span></li>
+                    <li className="flex items-center space-x-1.5"><Check className="w-3.5 h-3.5 text-emerald-400" /> <span>Enviar Mensagens em Canais de Texto</span></li>
+                  </ul>
+                </div>
+              </div>
             )}
 
             {/* TAB 2: CANAIS */}

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext.js';
 import { api } from '../../services/api.js';
-import { X, User as UserIcon, Camera, Sparkles } from 'lucide-react';
+import { X, User as UserIcon, Camera, Upload } from 'lucide-react';
 
 interface UserSettingsModalProps {
   onClose: () => void;
@@ -15,9 +15,21 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({ onClose })
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
 
-  const handleRandomAvatar = () => {
-    const seed = Math.random().toString(36).substring(7);
-    setAvatarUrl(`https://api.dicebear.com/7.x/bottts/svg?seed=${seed}`);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setError('A imagem deve ter no máximo 5MB.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,7 +40,7 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({ onClose })
 
     try {
       await api.put('/auth/profile', { username, avatarUrl });
-      setSuccess('Perfil atualizado com sucesso! Recarregue para aplicar todas as fotos.');
+      setSuccess('Perfil atualizado com sucesso! Recarregando...');
       setTimeout(() => {
         window.location.reload();
       }, 1000);
@@ -56,24 +68,41 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({ onClose })
         {success && <p className="text-xs text-emerald-400 bg-emerald-500/10 p-2.5 rounded-xl">{success}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Avatar Preview & Randomizer */}
+          {/* Avatar Preview & File Upload */}
           <div className="flex flex-col items-center space-y-3 py-2">
-            <div className="relative">
-              <img
-                src={avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${username}`}
-                alt="Avatar"
-                className="w-20 h-20 rounded-full bg-gray-800 border-2 border-vocalis-accent object-cover shadow-neon"
-              />
-              <button
-                type="button"
-                onClick={handleRandomAvatar}
-                className="absolute -bottom-1 -right-1 p-1.5 bg-vocalis-neon text-white rounded-full hover:scale-110 transition-transform shadow-md"
-                title="Gerar Avatar Aleatório"
-              >
-                <Sparkles className="w-4 h-4" />
-              </button>
+            <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt="Avatar"
+                  className="w-24 h-24 rounded-full bg-gray-800 border-2 border-vocalis-accent object-cover shadow-neon"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-full bg-gray-800 border-2 border-dashed border-gray-600 flex items-center justify-center text-gray-400">
+                  <UserIcon className="w-10 h-10" />
+                </div>
+              )}
+              <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity">
+                <Camera className="w-6 h-6" />
+              </div>
             </div>
-            <span className="text-xs text-gray-400">Clique na varinha para gerar novo avatar</span>
+
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileUpload}
+            />
+
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="px-3.5 py-1.5 bg-gray-800 hover:bg-vocalis-hover text-gray-200 border border-gray-700 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-colors"
+            >
+              <Upload className="w-3.5 h-3.5 text-vocalis-accent" />
+              <span>Escolher Foto do Dispositivo</span>
+            </button>
           </div>
 
           <div>
@@ -91,13 +120,13 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({ onClose })
 
           <div>
             <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1.5">
-              URL da Foto de Perfil
+              URL da Foto de Perfil (Opcional)
             </label>
             <input
-              type="url"
+              type="text"
               value={avatarUrl}
               onChange={(e) => setAvatarUrl(e.target.value)}
-              placeholder="https://exemplo.com/avatar.png"
+              placeholder="Cole o link da foto ou selecione um arquivo acima"
               className="w-full px-4 py-2.5 bg-vocalis-bg border border-gray-700 rounded-xl text-sm text-white focus:outline-none focus:border-vocalis-accent"
             />
           </div>

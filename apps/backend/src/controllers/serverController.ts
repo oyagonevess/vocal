@@ -6,12 +6,12 @@ import { AuthenticatedRequest } from '../middleware/auth.js';
 
 const createServerSchema = z.object({
   name: z.string().min(2).max(50),
-  iconUrl: z.string().url().optional(),
+  iconUrl: z.string().optional().nullable(),
 });
 
 const updateServerSchema = z.object({
   name: z.string().min(2).max(50).optional(),
-  iconUrl: z.string().url().optional(),
+  iconUrl: z.string().optional().nullable(),
 });
 
 export async function createServer(req: AuthenticatedRequest, res: Response) {
