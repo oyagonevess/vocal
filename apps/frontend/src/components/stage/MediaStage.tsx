@@ -54,16 +54,19 @@ export const MediaStage: React.FC<MediaStageProps> = ({
     <div className="flex-1 flex flex-row overflow-hidden relative w-full h-full">
       <main className="flex-1 bg-vocalis-bg flex flex-col relative overflow-hidden">
         {/* Top Bar Header */}
-        <header className="h-16 px-4 md:px-6 border-b border-gray-800/60 flex items-center justify-between z-10 shrink-0">
-          <div className="flex items-center space-x-3">
+        <header className="h-16 md:h-16 pt-2 md:pt-0 px-4 md:px-6 border-b border-gray-800/60 flex items-center justify-between z-10 shrink-0">
+          <div className="flex items-center space-x-2.5 min-w-0">
             {onToggleMobileMenu && (
               <button
-                onClick={onToggleMobileMenu}
-                className="md:hidden flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-vocalis-card hover:bg-vocalis-hover text-gray-200 transition-colors mr-1 border border-gray-800/80 shadow-sm shrink-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleMobileMenu();
+                }}
+                className="md:hidden flex items-center space-x-1 px-2.5 py-1.5 rounded-xl bg-vocalis-accent/20 hover:bg-vocalis-accent/30 text-white transition-all mr-1 border border-vocalis-accent/40 shadow-sm shrink-0 active:scale-95"
                 title="Voltar para Canais e Servidores"
               >
                 <ChevronLeft className="w-5 h-5 text-vocalis-accent shrink-0" />
-                <span className="text-xs font-bold text-gray-200">Salas</span>
+                <span className="text-xs font-bold text-white">Salas</span>
               </button>
             )}
             {isTextChannel ? (

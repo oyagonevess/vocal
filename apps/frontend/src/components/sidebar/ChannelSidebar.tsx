@@ -45,7 +45,7 @@ export const ChannelSidebar: React.FC<ChannelSidebarProps> = ({
   return (
     <aside className="w-full md:w-64 bg-vocalis-sidebar border-r border-gray-800/60 flex flex-col z-10 select-none h-full">
       {/* Server Title Header */}
-      <div className="h-16 px-4 border-b border-gray-800/60 flex items-center justify-between shadow-sm">
+      <div className="h-16 pt-2 md:pt-0 px-4 border-b border-gray-800/60 flex items-center justify-between shadow-sm">
         <h2 className="font-bold text-lg text-white truncate">{server.name}</h2>
         <div className="flex items-center space-x-1">
           {onToggleMobileStage && (

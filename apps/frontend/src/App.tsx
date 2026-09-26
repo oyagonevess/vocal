@@ -159,25 +159,32 @@ export const App: React.FC = () => {
 
   const [mobileTab, setMobileTab] = useState<'sidebar' | 'stage'>('sidebar');
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [touchStartY, setTouchStartY] = useState<number | null>(null);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStartX(e.touches[0].clientX);
+    setTouchStartY(e.touches[0].clientY);
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX === null) return;
+    if (touchStartX === null || touchStartY === null) return;
     const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
     const diffX = touchStartX - touchEndX;
+    const diffY = touchStartY - touchEndY;
 
-    // Swipe Threshold: 50px
-    if (diffX > 50) {
-      // Swiped left -> Open Stage
-      setMobileTab('stage');
-    } else if (diffX < -50) {
-      // Swiped right -> Open Sidebar
-      setMobileTab('sidebar');
+    // Trigger swipe only if horizontal delta is larger than vertical delta and exceeds 40px
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
+      if (diffX > 0) {
+        // Swiped left -> Open Stage
+        setMobileTab('stage');
+      } else {
+        // Swiped right -> Open Sidebar
+        setMobileTab('sidebar');
+      }
     }
     setTouchStartX(null);
+    setTouchStartY(null);
   };
 
   const handleSelectChannelAndSwitchTab = (ch: Channel) => {
@@ -204,14 +211,14 @@ export const App: React.FC = () => {
       onTouchEnd={handleTouchEnd}
       className="w-screen h-screen bg-vocalis-bg overflow-hidden select-none font-['Inter',sans-serif] relative"
     >
-      {/* Smooth Sliding Container: 200vw on mobile (300ms CSS slide), w-full on desktop */}
+      {/* Smooth Sliding Container: 200% width on mobile (300ms CSS slide), w-full on desktop */}
       <div
-        className={`w-[200vw] md:w-full h-full flex flex-row transition-transform duration-300 ease-out ${
-          mobileTab === 'stage' ? '-translate-x-[100vw] md:translate-x-0' : 'translate-x-0'
+        className={`w-[200%] md:w-full h-full flex flex-row transition-transform duration-300 ease-out ${
+          mobileTab === 'stage' ? '-translate-x-1/2 md:translate-x-0' : 'translate-x-0'
         }`}
       >
-        {/* Panel 1: Mobile Sidebar View (100vw on mobile, w-auto on desktop) */}
-        <div className="w-[100vw] md:w-auto h-full flex flex-row shrink-0 md:shrink">
+        {/* Panel 1: Mobile Sidebar View (50% of 200% = 100% viewport on mobile, w-auto on desktop) */}
+        <div className="w-1/2 md:w-auto h-full flex flex-row shrink-0 md:shrink">
           <ServerSidebar
             servers={servers}
             activeServerId={activeServer?.id || null}
@@ -234,8 +241,8 @@ export const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Panel 2: Mobile Main Stage / Chat View (100vw on mobile, flex-1 on desktop) */}
-        <div className="w-[100vw] md:w-full h-full flex-1 shrink-0 md:shrink flex flex-col">
+        {/* Panel 2: Mobile Main Stage / Chat View (50% of 200% = 100% viewport on mobile, flex-1 on desktop) */}
+        <div className="w-1/2 md:w-full h-full flex-1 shrink-0 md:shrink flex flex-col">
           <MediaStage
             selectedChannel={selectedChannel}
             activeServer={activeServer}
