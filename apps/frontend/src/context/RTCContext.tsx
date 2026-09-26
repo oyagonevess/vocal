@@ -224,6 +224,28 @@ export const RTCProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             localScreenTrackRef.current = customScreenTrack;
             await agoraClientRef.current.publish([customScreenTrack]);
 
+            // Apply WebRTC RTCRtpSender optimizations for mobile decoders (Android/iOS)
+            try {
+              const client = agoraClientRef.current as any;
+              const pc: RTCPeerConnection | undefined = client?._p2pClient?._peerConnection || client?._peerConnection;
+              if (pc && typeof pc.getSenders === 'function') {
+                pc.getSenders().forEach((sender: RTCRtpSender) => {
+                  if (sender.track && sender.track.kind === 'video') {
+                    const params = sender.getParameters();
+                    if (!params.encodings) params.encodings = [{}];
+                    params.encodings.forEach((encoding) => {
+                      encoding.scaleResolutionDownBy = 1.5;
+                      encoding.maxBitrate = 800000; // 800 kbps max bitrate for mobile smooth decoding
+                    });
+                    (params as any).degradationPreference = 'maintain-framerate';
+                    sender.setParameters(params).catch(() => {});
+                  }
+                });
+              }
+            } catch (wrtcErr) {
+              console.warn('Otimização WebRTC RtpSender não suportada:', wrtcErr);
+            }
+
             videoTrack.onended = async () => {
               if (localScreenTrackRef.current && agoraClientRef.current) {
                 try {

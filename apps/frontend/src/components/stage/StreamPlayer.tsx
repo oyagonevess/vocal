@@ -119,8 +119,8 @@ const StreamPlayerComponent: React.FC<StreamPlayerProps> = ({
               });
             }
           }}
-          style={{ width: '100%', height: '100%', objectFit: objectFit || 'contain' }}
-          className="w-full h-full"
+          style={{ width: '100%', height: '100%', maxHeight: '100vh', objectFit: objectFit || 'contain' }}
+          className="w-full h-full max-h-screen object-contain"
         />
       )}
 

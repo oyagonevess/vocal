@@ -88,7 +88,11 @@ export function useMediaDevices() {
     } else {
       try {
         const stream = await navigator.mediaDevices.getDisplayMedia({
-          video: true,
+          video: {
+            width: { max: 1280, ideal: 1280 },
+            height: { max: 720, ideal: 720 },
+            frameRate: { max: 30, ideal: 30 },
+          },
           audio: true, // Captura de áudio do sistema se suportado
         });
 
