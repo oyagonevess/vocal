@@ -16,7 +16,7 @@ export const FloatingControlBar: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center space-x-3 px-5 py-3 bg-vocalis-card/90 backdrop-blur-xl border border-gray-700/60 rounded-2xl shadow-2xl">
+    <div className="fixed bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center space-x-2 md:space-x-3 px-3.5 md:px-5 py-2.5 md:py-3 bg-vocalis-sidebar/95 backdrop-blur-xl border border-gray-800/90 rounded-2xl shadow-2xl max-w-[95vw]">
       {/* Microphone Toggle */}
       <button
         onClick={mediaDevices.toggleMute}

@@ -190,49 +190,48 @@ export const App: React.FC = () => {
     <div
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      className="w-screen h-screen flex bg-vocalis-bg overflow-hidden select-none font-['Inter',sans-serif] relative"
+      className="w-screen h-screen bg-vocalis-bg overflow-hidden select-none font-['Inter',sans-serif] relative"
     >
-      {/* 1 & 2. Leftmost Server Icons Sidebar + Channel Sidebar (Visible on Desktop OR when mobileTab === 'sidebar') */}
+      {/* Smooth Sliding Container: 200vw on mobile (300ms CSS slide), w-full on desktop */}
       <div
-        className={`h-full flex-row ${
-          mobileTab === 'sidebar' ? 'flex w-full md:w-auto' : 'hidden md:flex'
+        className={`w-[200vw] md:w-full h-full flex flex-row transition-transform duration-300 ease-out ${
+          mobileTab === 'stage' ? '-translate-x-[100vw] md:translate-x-0' : 'translate-x-0'
         }`}
       >
-        <ServerSidebar
-          servers={servers}
-          activeServerId={activeServer?.id || null}
-          onSelectServer={handleSelectServer}
-          onOpenCreateServer={() => setShowCreateServer(true)}
-          onOpenJoinServer={() => setShowJoinServerModal(true)}
-        />
-
-        <div className="flex flex-col h-full flex-1 md:flex-none">
-          <ChannelSidebar
-            server={activeServer}
-            activeChannel={selectedChannel}
-            onSelectChannel={handleSelectChannelAndSwitchTab}
-            onOpenCreateChannel={() => setShowCreateChannel(true)}
-            onOpenInviteModal={() => setShowInviteModal(true)}
-            onOpenServerSettings={() => setShowServerSettings(true)}
-            onToggleMobileStage={() => setMobileTab('stage')}
+        {/* Panel 1: Mobile Sidebar View (100vw on mobile, w-auto on desktop) */}
+        <div className="w-[100vw] md:w-auto h-full flex flex-row shrink-0 md:shrink">
+          <ServerSidebar
+            servers={servers}
+            activeServerId={activeServer?.id || null}
+            onSelectServer={handleSelectServer}
+            onOpenCreateServer={() => setShowCreateServer(true)}
+            onOpenJoinServer={() => setShowJoinServerModal(true)}
           />
-          <UserFooterBar />
+
+          <div className="flex flex-col h-full flex-1 md:w-64">
+            <ChannelSidebar
+              server={activeServer}
+              activeChannel={selectedChannel}
+              onSelectChannel={handleSelectChannelAndSwitchTab}
+              onOpenCreateChannel={() => setShowCreateChannel(true)}
+              onOpenInviteModal={() => setShowInviteModal(true)}
+              onOpenServerSettings={() => setShowServerSettings(true)}
+              onToggleMobileStage={() => setMobileTab('stage')}
+            />
+            <UserFooterBar />
+          </div>
+        </div>
+
+        {/* Panel 2: Mobile Main Stage / Chat View (100vw on mobile, flex-1 on desktop) */}
+        <div className="w-[100vw] md:w-full h-full flex-1 shrink-0 md:shrink flex flex-col">
+          <MediaStage
+            selectedChannel={selectedChannel}
+            onToggleMobileMenu={() => setMobileTab('sidebar')}
+          />
         </div>
       </div>
 
-      {/* 3. Central Media Stage / Viewport or Text Chat (Visible on Desktop OR when mobileTab === 'stage') */}
-      <div
-        className={`h-full flex-1 ${
-          mobileTab === 'stage' ? 'flex w-full' : 'hidden md:flex'
-        }`}
-      >
-        <MediaStage
-          selectedChannel={selectedChannel}
-          onToggleMobileMenu={() => setMobileTab('sidebar')}
-        />
-      </div>
-
-      {/* 4. Floating Call Controls Bar (when inside voice room) */}
+      {/* Floating Call Controls Bar (when inside voice room) */}
       <FloatingControlBar />
 
       {/* 5. Modals */}

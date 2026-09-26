@@ -72,27 +72,27 @@ export const MediaStage: React.FC<MediaStageProps> = ({ selectedChannel, onToggl
         </div>
 
         {/* Header Right Actions */}
-        <div className="flex items-center space-x-4">
-          <div className="relative">
+        <div className="flex items-center space-x-2 md:space-x-4">
+          <div className="relative hidden md:block">
             <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Buscar no Vocalis..."
-              className="pl-9 pr-4 py-1.5 bg-vocalis-card border border-gray-800 rounded-xl text-sm text-gray-200 focus:outline-none focus:border-vocalis-accent w-48 transition-all"
+              className="pl-9 pr-4 py-1.5 bg-vocalis-card border border-gray-800/80 rounded-xl text-sm text-gray-200 focus:outline-none focus:border-vocalis-accent w-48 transition-all"
             />
           </div>
 
-          <button className="p-2 rounded-xl bg-vocalis-card hover:bg-vocalis-hover text-gray-300 transition-colors">
+          <button className="hidden sm:block p-2 rounded-xl bg-vocalis-card hover:bg-vocalis-hover text-gray-300 transition-colors">
             <Bell className="w-4 h-4" />
           </button>
-          <button className="p-2 rounded-xl bg-vocalis-card hover:bg-vocalis-hover text-gray-300 transition-colors">
+          <button className="hidden sm:block p-2 rounded-xl bg-vocalis-card hover:bg-vocalis-hover text-gray-300 transition-colors">
             <Settings className="w-4 h-4" />
           </button>
 
           {user && (
-            <div className="flex items-center space-x-2 pl-2 border-l border-gray-800">
-              <img src={user.avatarUrl} alt={user.username} className="w-8 h-8 rounded-full bg-gray-700 object-cover" />
-              <span className="text-sm font-semibold text-gray-200">{user.username}</span>
+            <div className="flex items-center space-x-2 pl-2 border-l border-gray-800/80">
+              <img src={user.avatarUrl} alt={user.username} className="w-8 h-8 rounded-full bg-gray-800 object-cover" />
+              <span className="hidden sm:inline text-sm font-semibold text-gray-200">{user.username}</span>
             </div>
           )}
         </div>

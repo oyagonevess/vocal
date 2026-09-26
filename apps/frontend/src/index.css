@@ -2,19 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  background-color: #050506;
+  color: #f4f4f5;
+}
+
 @layer utilities {
   .scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
+    width: 5px;
+    height: 5px;
   }
   .scrollbar-thin::-webkit-scrollbar-track {
     background: transparent;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: #282d3f;
+    background: #1f1f23;
     border-radius: 9999px;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: #3f4661;
+    background: #2e2e34;
   }
 }
 
