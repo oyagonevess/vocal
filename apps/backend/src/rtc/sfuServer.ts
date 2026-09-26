@@ -73,6 +73,9 @@ class SFUSignalingServer {
 
       // Join Channel Room
       socket.on('join-channel', ({ channelId, serverId, avatarUrl }) => {
+        // Purge user from any previous channel room first to prevent ghost peers
+        this.handlePeerLeave(socket);
+
         let room = this.rooms.get(channelId);
         if (!room) {
           room = {
@@ -205,35 +208,43 @@ class SFUSignalingServer {
   }
 
   private handlePeerLeave(socket: Socket) {
-    const channelId = (socket as any).currentChannelId;
-    if (!channelId) return;
+    const user = (socket as any).user as AuthPayload | undefined;
+    const userId = user?.userId;
 
-    const room = this.rooms.get(channelId);
-    if (!room) return;
+    for (const [channelId, room] of Array.from(this.rooms.entries())) {
+      let removedPeer: RoomPeer | undefined;
 
-    const peer = room.peers.get(socket.id);
-    if (peer) {
-      room.peers.delete(socket.id);
-      socket.leave(`channel:${channelId}`);
-      delete (socket as any).currentChannelId;
-
-      console.log(`[SFU] Peer saiu: ${peer.username} (${socket.id})`);
-
-      socket.to(`channel:${channelId}`).emit('peer-left', {
-        socketId: socket.id,
-        userId: peer.userId,
-      });
-
-      const remainingPeers = Array.from(room.peers.values());
-      if (remainingPeers.length === 0) {
-        this.rooms.delete(channelId);
+      for (const [peerSocketId, peer] of Array.from(room.peers.entries())) {
+        if (peerSocketId === socket.id || (userId && peer.userId === userId)) {
+          removedPeer = peer;
+          room.peers.delete(peerSocketId);
+        }
       }
 
-      this.io?.emit('channel-presence-update', {
-        channelId,
-        serverId: room.serverId,
-        peers: remainingPeers,
-      });
+      if (removedPeer) {
+        socket.leave(`channel:${channelId}`);
+        if ((socket as any).currentChannelId === channelId) {
+          delete (socket as any).currentChannelId;
+        }
+
+        console.log(`[SFU] Peer saiu: ${removedPeer.username} (${socket.id}) do canal ${channelId}`);
+
+        socket.to(`channel:${channelId}`).emit('peer-left', {
+          socketId: socket.id,
+          userId: removedPeer.userId,
+        });
+
+        const remainingPeers = Array.from(room.peers.values());
+        if (remainingPeers.length === 0) {
+          this.rooms.delete(channelId);
+        }
+
+        this.io?.emit('channel-presence-update', {
+          channelId,
+          serverId: room.serverId,
+          peers: remainingPeers,
+        });
+      }
     }
   }
 
