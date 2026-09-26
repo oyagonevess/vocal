@@ -138,7 +138,22 @@ export const RTCProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
 
     socket.on('room-peers', (existingPeers: RoomPeer[]) => {
-      setPeers(existingPeers.filter((p) => p.userId !== user.id));
+      const otherPeers = existingPeers.filter((p) => p.userId !== user.id);
+      setPeers((prev) => {
+        return otherPeers.map((incoming) => {
+          const existing = prev.find((p) => p.userId === incoming.userId || p.socketId === incoming.socketId);
+          if (existing) {
+            return {
+              ...incoming,
+              stream: existing.stream || incoming.stream,
+              screenStream: existing.screenStream || incoming.screenStream,
+              cameraOn: existing.cameraOn || incoming.cameraOn,
+              screenSharing: existing.screenSharing || incoming.screenSharing,
+            };
+          }
+          return incoming;
+        });
+      });
     });
 
     return () => {
@@ -385,6 +400,33 @@ export const RTCProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       // 3. Join Agora RTC Room Channel
       await agoraClient.join(appId, channelName, token, user.id);
+
+      // Subscribe to any remote users already in the room
+      for (const remoteUser of agoraClient.remoteUsers) {
+        if (remoteUser.hasAudio) {
+          try {
+            await agoraClient.subscribe(remoteUser, 'audio');
+            remoteUser.audioTrack?.play();
+          } catch (e) {}
+        }
+        if (remoteUser.hasVideo) {
+          try {
+            await agoraClient.subscribe(remoteUser, 'video');
+            const videoTrack = remoteUser.videoTrack;
+            if (videoTrack) {
+              const stream = new MediaStream([videoTrack.getMediaStreamTrack()]);
+              const uidStr = String(remoteUser.uid);
+              setPeers((prev) =>
+                prev.map((p) =>
+                  p.userId === uidStr || p.socketId === uidStr
+                    ? { ...p, stream, screenStream: stream, cameraOn: true, screenSharing: p.screenSharing || true }
+                    : p
+                )
+              );
+            }
+          } catch (e) {}
+        }
+      }
 
       // 4. Create and Publish Local Microphone Audio Track
       try {

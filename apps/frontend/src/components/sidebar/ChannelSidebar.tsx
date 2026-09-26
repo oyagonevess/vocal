@@ -1,6 +1,6 @@
 import React from 'react';
 import { Server, Channel, RoomPeer } from '../../types/index.js';
-import { Volume2, Hash, Plus, UserPlus, MicOff, Monitor, Settings } from 'lucide-react';
+import { Volume2, Hash, Plus, UserPlus, MicOff, Monitor, Settings, MessageSquare } from 'lucide-react';
 import { useRTC } from '../../context/RTCContext.js';
 
 interface ChannelSidebarProps {
@@ -10,6 +10,7 @@ interface ChannelSidebarProps {
   onOpenCreateChannel: () => void;
   onOpenInviteModal: () => void;
   onOpenServerSettings: () => void;
+  onToggleMobileStage?: () => void;
 }
 
 export const ChannelSidebar: React.FC<ChannelSidebarProps> = ({
@@ -19,12 +20,13 @@ export const ChannelSidebar: React.FC<ChannelSidebarProps> = ({
   onOpenCreateChannel,
   onOpenInviteModal,
   onOpenServerSettings,
+  onToggleMobileStage,
 }) => {
   const { joinChannel, channelPresence } = useRTC();
 
   if (!server) {
     return (
-      <aside className="w-64 bg-vocalis-sidebar border-r border-gray-800/60 p-4 flex items-center justify-center text-gray-500 text-sm">
+      <aside className="w-full md:w-64 bg-vocalis-sidebar border-r border-gray-800/60 p-4 flex items-center justify-center text-gray-500 text-sm">
         Nenhum servidor selecionado.
       </aside>
     );
@@ -41,11 +43,21 @@ export const ChannelSidebar: React.FC<ChannelSidebarProps> = ({
   };
 
   return (
-    <aside className="w-64 bg-vocalis-sidebar border-r border-gray-800/60 flex flex-col z-10 select-none">
+    <aside className="w-full md:w-64 bg-vocalis-sidebar border-r border-gray-800/60 flex flex-col z-10 select-none h-full">
       {/* Server Title Header */}
       <div className="h-16 px-4 border-b border-gray-800/60 flex items-center justify-between shadow-sm">
         <h2 className="font-bold text-lg text-white truncate">{server.name}</h2>
         <div className="flex items-center space-x-1">
+          {onToggleMobileStage && (
+            <button
+              onClick={onToggleMobileStage}
+              className="md:hidden p-1.5 rounded-lg bg-vocalis-accent/20 text-vocalis-accent hover:bg-vocalis-accent/30 transition-colors text-xs font-semibold px-2 flex items-center space-x-1"
+              title="Ir para o Chat/Estágio"
+            >
+              <span>Chat</span>
+              <MessageSquare className="w-3.5 h-3.5" />
+            </button>
+          )}
           <button
             onClick={onOpenServerSettings}
             className="p-1.5 rounded-lg bg-gray-800/50 hover:bg-vocalis-hover text-gray-400 hover:text-white transition-colors"

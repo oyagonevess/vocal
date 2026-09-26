@@ -145,6 +145,34 @@ export const App: React.FC = () => {
     }
   };
 
+  const [mobileTab, setMobileTab] = useState<'sidebar' | 'stage'>('sidebar');
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diffX = touchStartX - touchEndX;
+
+    // Swipe Threshold: 50px
+    if (diffX > 50) {
+      // Swiped left -> Open Stage
+      setMobileTab('stage');
+    } else if (diffX < -50) {
+      // Swiped right -> Open Sidebar
+      setMobileTab('sidebar');
+    }
+    setTouchStartX(null);
+  };
+
+  const handleSelectChannelAndSwitchTab = (ch: Channel) => {
+    setSelectedChannel(ch);
+    setMobileTab('stage');
+  };
+
   if (loading) {
     return (
       <div className="w-screen h-screen bg-vocalis-bg flex flex-col items-center justify-center text-white space-y-4">
@@ -159,31 +187,50 @@ export const App: React.FC = () => {
   }
 
   return (
-    <div className="w-screen h-screen flex bg-vocalis-bg overflow-hidden select-none font-['Inter',sans-serif]">
-      {/* 1. Leftmost Server Icons Sidebar */}
-      <ServerSidebar
-        servers={servers}
-        activeServerId={activeServer?.id || null}
-        onSelectServer={handleSelectServer}
-        onOpenCreateServer={() => setShowCreateServer(true)}
-        onOpenJoinServer={() => setShowJoinServerModal(true)}
-      />
-
-      {/* 2. Secondary Channel Sidebar & Bottom User Footer */}
-      <div className="flex flex-col h-full">
-        <ChannelSidebar
-          server={activeServer}
-          activeChannel={selectedChannel}
-          onSelectChannel={(ch) => setSelectedChannel(ch)}
-          onOpenCreateChannel={() => setShowCreateChannel(true)}
-          onOpenInviteModal={() => setShowInviteModal(true)}
-          onOpenServerSettings={() => setShowServerSettings(true)}
+    <div
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      className="w-screen h-screen flex bg-vocalis-bg overflow-hidden select-none font-['Inter',sans-serif] relative"
+    >
+      {/* 1 & 2. Leftmost Server Icons Sidebar + Channel Sidebar (Visible on Desktop OR when mobileTab === 'sidebar') */}
+      <div
+        className={`h-full flex-row ${
+          mobileTab === 'sidebar' ? 'flex w-full md:w-auto' : 'hidden md:flex'
+        }`}
+      >
+        <ServerSidebar
+          servers={servers}
+          activeServerId={activeServer?.id || null}
+          onSelectServer={handleSelectServer}
+          onOpenCreateServer={() => setShowCreateServer(true)}
+          onOpenJoinServer={() => setShowJoinServerModal(true)}
         />
-        <UserFooterBar />
+
+        <div className="flex flex-col h-full flex-1 md:flex-none">
+          <ChannelSidebar
+            server={activeServer}
+            activeChannel={selectedChannel}
+            onSelectChannel={handleSelectChannelAndSwitchTab}
+            onOpenCreateChannel={() => setShowCreateChannel(true)}
+            onOpenInviteModal={() => setShowInviteModal(true)}
+            onOpenServerSettings={() => setShowServerSettings(true)}
+            onToggleMobileStage={() => setMobileTab('stage')}
+          />
+          <UserFooterBar />
+        </div>
       </div>
 
-      {/* 3. Central Media Stage / Viewport or Text Chat */}
-      <MediaStage selectedChannel={selectedChannel} />
+      {/* 3. Central Media Stage / Viewport or Text Chat (Visible on Desktop OR when mobileTab === 'stage') */}
+      <div
+        className={`h-full flex-1 ${
+          mobileTab === 'stage' ? 'flex w-full' : 'hidden md:flex'
+        }`}
+      >
+        <MediaStage
+          selectedChannel={selectedChannel}
+          onToggleMobileMenu={() => setMobileTab('sidebar')}
+        />
+      </div>
 
       {/* 4. Floating Call Controls Bar (when inside voice room) */}
       <FloatingControlBar />

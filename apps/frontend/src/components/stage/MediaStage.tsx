@@ -1,5 +1,5 @@
 import React from 'react';
-import { Volume2, Hash, Search, Bell, Settings, ShieldCheck, Radio, Monitor } from 'lucide-react';
+import { Menu, Volume2, Hash, Search, Bell, Settings, ShieldCheck, Radio, Monitor } from 'lucide-react';
 import { useRTC } from '../../context/RTCContext';
 import { useAuth } from '../../context/AuthContext';
 import { ParticipantCard } from './ParticipantCard';
@@ -9,9 +9,10 @@ import { RoomPeer, Channel } from '../../types/index';
 
 interface MediaStageProps {
   selectedChannel: Channel | null;
+  onToggleMobileMenu?: () => void;
 }
 
-export const MediaStage: React.FC<MediaStageProps> = ({ selectedChannel }) => {
+export const MediaStage: React.FC<MediaStageProps> = ({ selectedChannel, onToggleMobileMenu }) => {
   const { activeChannel, peers, mediaDevices } = useRTC();
   const { user } = useAuth();
 
@@ -43,14 +44,23 @@ export const MediaStage: React.FC<MediaStageProps> = ({ selectedChannel }) => {
   return (
     <main className="flex-1 bg-vocalis-bg flex flex-col relative overflow-hidden">
       {/* Top Bar Header */}
-      <header className="h-16 px-6 border-b border-gray-800/60 flex items-center justify-between z-10 shrink-0">
+      <header className="h-16 px-4 md:px-6 border-b border-gray-800/60 flex items-center justify-between z-10 shrink-0">
         <div className="flex items-center space-x-3">
-          {isTextChannel ? (
-            <Hash className="w-5 h-5 text-vocalis-accent" />
-          ) : (
-            <Volume2 className="w-5 h-5 text-vocalis-accent" />
+          {onToggleMobileMenu && (
+            <button
+              onClick={onToggleMobileMenu}
+              className="md:hidden p-2 rounded-xl bg-vocalis-card hover:bg-vocalis-hover text-gray-300 transition-colors mr-1"
+              title="Abrir Menu de Canais"
+            >
+              <Menu className="w-5 h-5 text-vocalis-accent" />
+            </button>
           )}
-          <h1 className="font-bold text-lg text-white">
+          {isTextChannel ? (
+            <Hash className="w-5 h-5 text-vocalis-accent shrink-0" />
+          ) : (
+            <Volume2 className="w-5 h-5 text-vocalis-accent shrink-0" />
+          )}
+          <h1 className="font-bold text-base md:text-lg text-white truncate">
             {selectedChannel ? selectedChannel.name : 'Nenhum canal selecionado'}
           </h1>
           {activeChannel && isVoiceChannel && (
