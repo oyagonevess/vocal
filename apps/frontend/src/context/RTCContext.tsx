@@ -47,6 +47,28 @@ export const RTCProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const localVideoTrackRef = useRef<ILocalVideoTrack | null>(null);
   const localScreenTrackRef = useRef<ILocalVideoTrack | null>(null);
 
+  // Fetch initial REST presence when authenticated
+  useEffect(() => {
+    if (!accessToken || !user) return;
+    api.get('/rtc/presence')
+      .then((res) => {
+        if (res.data?.presence) {
+          setChannelPresence((prev) => {
+            const nextMap = new Map(prev);
+            Object.entries(res.data.presence as Record<string, RoomPeer[]>).forEach(([chId, peersList]) => {
+              if (peersList && peersList.length > 0) {
+                nextMap.set(chId, peersList);
+              } else {
+                nextMap.delete(chId);
+              }
+            });
+            return nextMap;
+          });
+        }
+      })
+      .catch(() => {});
+  }, [accessToken, user]);
+
   // Initialize Socket.IO Signaling Connection
   useEffect(() => {
     if (!accessToken || !user) {
@@ -60,12 +82,33 @@ export const RTCProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     socket.on('connect', () => {
       setConnected(true);
+      socket.emit('request-channel-presence');
     });
+
+    const handlePresenceSync = (presenceMapObj: Record<string, RoomPeer[]>) => {
+      setChannelPresence((prev) => {
+        const nextMap = new Map(prev);
+        Object.entries(presenceMapObj).forEach(([chId, peersList]) => {
+          if (peersList && peersList.length > 0) {
+            nextMap.set(chId, peersList);
+          } else {
+            nextMap.delete(chId);
+          }
+        });
+        return nextMap;
+      });
+    };
+
+    socket.on('initial-presence-sync', handlePresenceSync);
 
     socket.on('channel-presence-update', ({ channelId, peers: roomPeers }: { channelId: string; peers: RoomPeer[] }) => {
       setChannelPresence((prev) => {
         const nextMap = new Map(prev);
-        nextMap.set(channelId, roomPeers);
+        if (!roomPeers || roomPeers.length === 0) {
+          nextMap.delete(channelId);
+        } else {
+          nextMap.set(channelId, roomPeers);
+        }
         return nextMap;
       });
     });
@@ -100,6 +143,7 @@ export const RTCProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     return () => {
       socket.off('connect');
+      socket.off('initial-presence-sync');
       socket.off('channel-presence-update');
       socket.off('peer-joined');
       socket.off('peer-left');

@@ -58,9 +58,17 @@ class SFUSignalingServer {
       const user = (socket as any).user as AuthPayload;
       console.log(`[SFU] Usuário conectado: ${user.username} (${socket.id})`);
 
+      // Send active presence sync to newly connected client immediately
+      socket.emit('initial-presence-sync', this.getPresenceMap());
+
+      socket.on('request-channel-presence', () => {
+        socket.emit('initial-presence-sync', this.getPresenceMap());
+      });
+
       // Join Server Room for real-time text chat
       socket.on('join-server-room', ({ serverId }) => {
         socket.join(`server:${serverId}`);
+        socket.emit('initial-presence-sync', this.getPresenceMap());
       });
 
       // Join Channel Room
@@ -232,6 +240,17 @@ class SFUSignalingServer {
   public getActivePeers(channelId: string): RoomPeer[] {
     const room = this.rooms.get(channelId);
     return room ? Array.from(room.peers.values()) : [];
+  }
+
+  public getPresenceMap(): Record<string, RoomPeer[]> {
+    const map: Record<string, RoomPeer[]> = {};
+    for (const [channelId, room] of this.rooms.entries()) {
+      const peers = Array.from(room.peers.values());
+      if (peers.length > 0) {
+        map[channelId] = peers;
+      }
+    }
+    return map;
   }
 }
 
