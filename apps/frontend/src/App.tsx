@@ -6,6 +6,7 @@ import { Server, Channel } from './types/index.js';
 
 import { ServerSidebar } from './components/sidebar/ServerSidebar.js';
 import { ChannelSidebar } from './components/sidebar/ChannelSidebar.js';
+import { MembersSidebar } from './components/sidebar/MembersSidebar.js';
 import { UserFooterBar } from './components/sidebar/UserFooterBar.js';
 import { MediaStage } from './components/stage/MediaStage.js';
 import { FloatingControlBar } from './components/stage/FloatingControlBar.js';
@@ -157,7 +158,8 @@ export const App: React.FC = () => {
     }
   };
 
-  const [mobileTab, setMobileTab] = useState<'sidebar' | 'stage'>('sidebar');
+  const [mobileTab, setMobileTab] = useState<'sidebar' | 'stage' | 'members'>('sidebar');
+  const [showMembersList, setShowMembersList] = useState(false);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [touchStartY, setTouchStartY] = useState<number | null>(null);
 
@@ -176,11 +178,13 @@ export const App: React.FC = () => {
     // Trigger swipe only if horizontal delta is larger than vertical delta and exceeds 40px
     if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
       if (diffX > 0) {
-        // Swiped left -> Open Stage
-        setMobileTab('stage');
+        // Swiped left -> Advance to next tab
+        if (mobileTab === 'sidebar') setMobileTab('stage');
+        else if (mobileTab === 'stage') setMobileTab('members');
       } else {
-        // Swiped right -> Open Sidebar
-        setMobileTab('sidebar');
+        // Swiped right -> Go back to previous tab
+        if (mobileTab === 'members') setMobileTab('stage');
+        else if (mobileTab === 'stage') setMobileTab('sidebar');
       }
     }
     setTouchStartX(null);
@@ -190,6 +194,11 @@ export const App: React.FC = () => {
   const handleSelectChannelAndSwitchTab = (ch: Channel) => {
     setSelectedChannel(ch);
     setMobileTab('stage');
+  };
+
+  const handleToggleMembersList = () => {
+    setShowMembersList((prev) => !prev);
+    setMobileTab((prev) => (prev === 'members' ? 'stage' : 'members'));
   };
 
   if (loading) {
@@ -209,16 +218,21 @@ export const App: React.FC = () => {
     <div
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      className="w-screen h-screen bg-vocalis-bg overflow-hidden select-none font-['Inter',sans-serif] relative"
+      style={{ touchAction: 'pan-y' }}
+      className="w-screen h-screen max-w-full overflow-hidden select-none font-['Inter',sans-serif] bg-vocalis-bg relative touch-pan-y"
     >
-      {/* Smooth Sliding Container: 200% width on mobile (300ms CSS slide), w-full on desktop */}
+      {/* 3-Panel Sliding Container: 300% width on mobile (300ms CSS slide), w-full on desktop */}
       <div
-        className={`w-[200%] md:w-full h-full flex flex-row transition-transform duration-300 ease-out ${
-          mobileTab === 'stage' ? '-translate-x-1/2 md:translate-x-0' : 'translate-x-0'
+        className={`w-[300%] md:w-full h-full flex flex-row transition-transform duration-300 ease-in-out ${
+          mobileTab === 'members'
+            ? '-translate-x-2/3 md:translate-x-0'
+            : mobileTab === 'stage'
+            ? '-translate-x-1/3 md:translate-x-0'
+            : 'translate-x-0'
         }`}
       >
-        {/* Panel 1: Mobile Sidebar View (50% of 200% = 100% viewport on mobile, w-auto on desktop) */}
-        <div className="w-1/2 md:w-auto h-full flex flex-row shrink-0 md:shrink">
+        {/* Panel 1: Mobile Sidebar View (33.333% of 300% = 100% viewport on mobile, w-auto on desktop) */}
+        <div className="w-1/3 md:w-auto h-full flex flex-row shrink-0 md:shrink-0">
           <ServerSidebar
             servers={servers}
             activeServerId={activeServer?.id || null}
@@ -241,13 +255,29 @@ export const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Panel 2: Mobile Main Stage / Chat View (50% of 200% = 100% viewport on mobile, flex-1 on desktop) */}
-        <div className="w-1/2 md:w-full h-full flex-1 shrink-0 md:shrink flex flex-col">
+        {/* Panel 2: Mobile Main Stage / Chat View (33.333% of 300% = 100% viewport on mobile, flex-1 on desktop) */}
+        <div className="w-1/3 md:w-full h-full flex-1 shrink-0 md:shrink flex flex-col min-w-0 overflow-hidden">
           <MediaStage
             selectedChannel={selectedChannel}
             activeServer={activeServer}
+            showMembersList={showMembersList}
             onToggleMobileMenu={() => setMobileTab('sidebar')}
+            onToggleMembersList={handleToggleMembersList}
           />
+        </div>
+
+        {/* Panel 3: Mobile Members View (33.333% of 300% = 100% viewport on mobile, w-64 on desktop) */}
+        <div className={`w-1/3 md:w-auto h-full shrink-0 flex flex-col ${showMembersList ? 'md:flex' : 'hidden md:hidden'}`}>
+          {activeServer && (
+            <MembersSidebar
+              server={activeServer}
+              isOpen={true}
+              onClose={() => {
+                setShowMembersList(false);
+                setMobileTab('stage');
+              }}
+            />
+          )}
         </div>
       </div>
 
