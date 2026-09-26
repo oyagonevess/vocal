@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Volume2, Hash, Search, Bell, Settings, ShieldCheck, Radio, Monitor } from 'lucide-react';
+import { Menu, Volume2, Hash, Search, Bell, Settings, Radio, Monitor } from 'lucide-react';
 import { useRTC } from '../../context/RTCContext';
 import { useAuth } from '../../context/AuthContext';
 import { ParticipantCard } from './ParticipantCard';
@@ -63,12 +63,6 @@ export const MediaStage: React.FC<MediaStageProps> = ({ selectedChannel, onToggl
           <h1 className="font-bold text-base md:text-lg text-white truncate">
             {selectedChannel ? selectedChannel.name : 'Nenhum canal selecionado'}
           </h1>
-          {activeChannel && isVoiceChannel && (
-            <span className="px-2.5 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold rounded-full flex items-center space-x-1">
-              <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
-              <span>Voz Ativa (Agora.io RTC)</span>
-            </span>
-          )}
         </div>
 
         {/* Header Right Actions */}
@@ -111,10 +105,6 @@ export const MediaStage: React.FC<MediaStageProps> = ({ selectedChannel, onToggl
               Plataforma de comunicação em tempo real via áudio, vídeo, transmissões e chat de texto.
               Selecione um canal de texto ou de voz no menu lateral para começar.
             </p>
-            <div className="flex items-center space-x-2 text-xs text-emerald-400 bg-emerald-500/10 px-4 py-2 rounded-xl border border-emerald-500/20">
-              <ShieldCheck className="w-4 h-4" />
-              <span>Agora.io + Supabase PostgreSQL + WSS e IP Masking SFU ativado.</span>
-            </div>
           </div>
         ) : isTextChannel ? (
           /* Text Chat View */
