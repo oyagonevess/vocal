@@ -43,7 +43,7 @@ export const ChannelSidebar: React.FC<ChannelSidebarProps> = ({
   };
 
   return (
-    <aside className="w-full md:w-64 bg-vocalis-sidebar border-r border-gray-800/60 flex flex-col z-10 select-none h-full">
+    <aside className="w-full flex-1 md:w-64 bg-vocalis-sidebar border-r border-gray-800/60 flex flex-col z-10 select-none h-full">
       {/* Server Title Header */}
       <div className="h-16 pt-2 md:pt-0 px-4 border-b border-gray-800/60 flex items-center justify-between shadow-sm">
         <h2 className="font-bold text-lg text-white truncate">{server.name}</h2>
@@ -76,7 +76,7 @@ export const ChannelSidebar: React.FC<ChannelSidebarProps> = ({
       </div>
 
       {/* Channels List */}
-      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6 scrollbar-thin">
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6 scrollbar-thin">
         {/* 1. Text Channels Section */}
         <div>
           <div className="flex items-center justify-between px-2 mb-2">

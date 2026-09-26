@@ -18,7 +18,7 @@ export const ServerSidebar: React.FC<ServerSidebarProps> = ({
   onOpenJoinServer,
 }) => {
   return (
-    <aside className="w-18 bg-vocalis-sidebar flex flex-col items-center py-4 space-y-3 border-r border-gray-800/60 z-20 select-none">
+    <aside className="w-18 shrink-0 bg-vocalis-sidebar flex flex-col items-center py-4 space-y-3 border-r border-gray-800/60 z-20 select-none h-full">
       {/* App Logo */}
       <div className="w-12 h-12 bg-vocalis-accent rounded-2xl flex items-center justify-center text-white shadow-neon cursor-pointer transition-all hover:rounded-xl">
         <Radio className="w-7 h-7" />
