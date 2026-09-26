@@ -20,11 +20,23 @@ import { MediaPermissionModal } from './components/modals/MediaPermissionModal.j
 
 export const App: React.FC = () => {
   const { user, loading } = useAuth();
-  const { mediaDevices } = useRTC();
+  const { activeChannel, mediaDevices } = useRTC();
 
   const [servers, setServers] = useState<Server[]>([]);
   const [activeServer, setActiveServer] = useState<Server | null>(null);
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
+
+  // Auto switch selectedChannel back to text channel when leaving voice call
+  useEffect(() => {
+    if (!activeChannel && selectedChannel?.type === 'VOICE') {
+      if (activeServer) {
+        const defaultTextChannel = activeServer.channels.find((c) => c.type === 'TEXT');
+        if (defaultTextChannel) {
+          setSelectedChannel(defaultTextChannel);
+        }
+      }
+    }
+  }, [activeChannel]);
 
   const [showCreateServer, setShowCreateServer] = useState(false);
   const [showCreateChannel, setShowCreateChannel] = useState(false);
@@ -226,6 +238,7 @@ export const App: React.FC = () => {
         <div className="w-[100vw] md:w-full h-full flex-1 shrink-0 md:shrink flex flex-col">
           <MediaStage
             selectedChannel={selectedChannel}
+            activeServer={activeServer}
             onToggleMobileMenu={() => setMobileTab('sidebar')}
           />
         </div>
