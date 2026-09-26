@@ -158,7 +158,7 @@ export const App: React.FC = () => {
     }
   };
 
-  const [mobileTab, setMobileTab] = useState<'sidebar' | 'stage' | 'members'>('sidebar');
+  const [mobileTab, setMobileTab] = useState<'sidebar' | 'stage' | 'members'>('stage');
   const [showMembersList, setShowMembersList] = useState(false);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [touchStartY, setTouchStartY] = useState<number | null>(null);
@@ -178,11 +178,11 @@ export const App: React.FC = () => {
     // Trigger swipe only if horizontal delta is larger than vertical delta and exceeds 40px
     if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
       if (diffX > 0) {
-        // Swiped left -> Advance to next tab
+        // Swiped left (finger moves left) -> Advance to right panel (Chat -> Members)
         if (mobileTab === 'sidebar') setMobileTab('stage');
         else if (mobileTab === 'stage') setMobileTab('members');
-      } else {
-        // Swiped right -> Go back to previous tab
+      } else if (diffX < 0) {
+        // Swiped right (finger moves right) -> Go back to left panel (Chat -> Sidebar)
         if (mobileTab === 'members') setMobileTab('stage');
         else if (mobileTab === 'stage') setMobileTab('sidebar');
       }
