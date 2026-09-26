@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, Volume2, Hash, Search, Bell, Settings, Radio, Monitor, Users } from 'lucide-react';
+import { Menu, Volume2, Hash, Search, Bell, Settings, Radio, Monitor, Users, ChevronLeft } from 'lucide-react';
 import { useRTC } from '../../context/RTCContext';
 import { useAuth } from '../../context/AuthContext';
 import { ParticipantCard } from './ParticipantCard';
@@ -59,10 +59,11 @@ export const MediaStage: React.FC<MediaStageProps> = ({
             {onToggleMobileMenu && (
               <button
                 onClick={onToggleMobileMenu}
-                className="md:hidden p-2 rounded-xl bg-vocalis-card hover:bg-vocalis-hover text-gray-300 transition-colors mr-1"
-                title="Abrir Menu de Canais"
+                className="md:hidden flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-vocalis-card hover:bg-vocalis-hover text-gray-200 transition-colors mr-1 border border-gray-800/80 shadow-sm shrink-0"
+                title="Voltar para Canais e Servidores"
               >
-                <Menu className="w-5 h-5 text-vocalis-accent" />
+                <ChevronLeft className="w-5 h-5 text-vocalis-accent shrink-0" />
+                <span className="text-xs font-bold text-gray-200">Salas</span>
               </button>
             )}
             {isTextChannel ? (
@@ -209,8 +210,8 @@ export const MediaStage: React.FC<MediaStageProps> = ({
             </div>
           ) : (
             /* Standard Voice Grid Mode (When No Screen Share is Active) */
-            <div className="flex-1 p-4 md:p-8 overflow-y-auto scrollbar-thin flex items-center justify-center">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-5xl mx-auto w-full">
+            <div className="flex-1 p-3 sm:p-4 md:p-8 overflow-y-auto scrollbar-thin flex items-center justify-center">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 max-w-5xl mx-auto w-full">
                 {allParticipants.map((peer) => (
                   <ParticipantCard
                     key={peer.socketId}
